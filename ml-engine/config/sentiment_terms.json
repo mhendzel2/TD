@@ -1,0 +1,43 @@
+{
+  "bullish_terms": [
+    "bullish", "bull", "buy", "long", "calls", "upside", "breakout", "momentum", 
+    "rally", "surge", "spike", "pump", "moon", "rocket", "squeeze", "gamma", 
+    "strong", "positive", "optimistic", "confident", "upgrade", "beat", "exceed",
+    "outperform", "growth", "expansion", "breakthrough", "catalyst", "opportunity",
+    "accumulation", "institutional", "whale", "volume", "support", "resistance",
+    "bounce", "reversal", "trend", "pattern", "signal", "indicator", "oversold",
+    "undervalued", "cheap", "discount", "bargain", "value", "potential", "target"
+  ],
+  "bearish_terms": [
+    "bearish", "bear", "sell", "short", "puts", "downside", "breakdown", "decline",
+    "drop", "fall", "crash", "dump", "tank", "plunge", "collapse", "weak",
+    "negative", "pessimistic", "concerned", "downgrade", "miss", "disappoint",
+    "underperform", "contraction", "headwind", "risk", "threat", "challenge",
+    "distribution", "selling", "pressure", "resistance", "breakdown", "support",
+    "failure", "reversal", "bearish", "pattern", "signal", "indicator", "overbought",
+    "overvalued", "expensive", "premium", "bubble", "correction", "pullback"
+  ],
+  "amplifiers": [
+    "very", "extremely", "highly", "significantly", "substantially", "dramatically",
+    "massively", "huge", "enormous", "tremendous", "incredible", "amazing",
+    "exceptional", "outstanding", "remarkable", "unprecedented", "historic",
+    "record", "all-time", "major", "critical", "crucial", "vital", "essential"
+  ],
+  "diminishers": [
+    "slightly", "somewhat", "moderately", "mildly", "marginally", "barely",
+    "hardly", "scarcely", "limited", "minor", "small", "little", "modest",
+    "gradual", "slow", "weak", "soft", "light", "thin", "narrow", "partial"
+  ],
+  "context_modifiers": [
+    "but", "however", "although", "despite", "nevertheless", "nonetheless",
+    "yet", "still", "except", "unless", "if", "when", "while", "whereas",
+    "though", "even", "only", "just", "merely", "simply", "perhaps", "maybe"
+  ],
+  "financial_terms": [
+    "earnings", "revenue", "profit", "loss", "margin", "guidance", "forecast",
+    "estimate", "consensus", "beat", "miss", "surprise", "outlook", "target",
+    "valuation", "multiple", "ratio", "yield", "dividend", "buyback", "split",
+    "merger", "acquisition", "ipo", "offering", "debt", "cash", "flow", "fcf"
+  ]
+}
+

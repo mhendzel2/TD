@@ -1,0 +1,76 @@
+{
+  "model_version": "1.0.0",
+  "models": {
+    "random_state": 42,
+    "probability": {
+      "n_estimators": 200,
+      "max_depth": 15,
+      "min_samples_split": 5,
+      "min_samples_leaf": 2
+    },
+    "direction": {
+      "n_estimators": 150,
+      "max_depth": 12
+    },
+    "magnitude": {
+      "n_estimators": 150,
+      "max_depth": 12
+    }
+  },
+  "features": {
+    "sentiment": [
+      "sentiment_score",
+      "sentiment_confidence", 
+      "sentiment_magnitude",
+      "bullish_terms_count",
+      "bearish_terms_count",
+      "amplifier_impact"
+    ],
+    "technical": [
+      "volume_ratio",
+      "price_momentum",
+      "volatility_rank",
+      "rsi",
+      "macd_signal",
+      "bollinger_position"
+    ],
+    "fundamental": [
+      "market_cap_category",
+      "sector_performance",
+      "earnings_proximity",
+      "analyst_rating",
+      "price_target_distance"
+    ],
+    "market": [
+      "market_regime",
+      "vix_level",
+      "sector_rotation",
+      "correlation_spy",
+      "beta"
+    ],
+    "portfolio": [
+      "current_position_size",
+      "portfolio_weight",
+      "correlation_with_portfolio",
+      "concentration_risk",
+      "available_buying_power"
+    ]
+  },
+  "training": {
+    "test_size": 0.2,
+    "cv_folds": 5,
+    "min_samples_for_training": 100,
+    "retrain_threshold_days": 7
+  },
+  "ticker_validation": {
+    "update_interval_hours": 24,
+    "external_source": "https://api.example.com/tickers",
+    "fallback_to_hardcoded": true
+  },
+  "sentiment_terms": {
+    "update_interval_hours": 168,
+    "external_source": "config/sentiment_terms.json",
+    "auto_update": false
+  }
+}
+

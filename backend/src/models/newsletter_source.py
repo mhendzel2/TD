@@ -2,13 +2,12 @@ from src.main import db
 from datetime import datetime
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
-import os
 
 class NewsletterSource(db.Model):
     __tablename__ = 'newsletter_sources'
     
-    id = db.Column(UUID(as_uuid=True) if 'postgresql' in os.getenv('DATABASE_URL', '') else db.String(36), 
-                   primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = db.Column(UUID(as_uuid=True), 
+                   primary_key=True, default=uuid.uuid4)
     name = db.Column(db.String(255), nullable=False)
     domain = db.Column(db.String(255), nullable=False)
     priority = db.Column(db.Integer, default=5)
@@ -17,7 +16,7 @@ class NewsletterSource(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships
-    newsletter_analyses = db.relationship('NewsletterAnalysis', backref='source', lazy=True)
+    newsletters = db.relationship('Newsletter', backref='newsletter_source', lazy=True)
 
     def __repr__(self):
         return f'<NewsletterSource {self.name}>'
@@ -30,7 +29,5 @@ class NewsletterSource(db.Model):
             'priority': self.priority,
             'credibility_score': float(self.credibility_score),
             'is_active': self.is_active,
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'created_at': self.created_at.isoformat()
         }
-
-

@@ -7,10 +7,8 @@ import os
 class UserAlert(db.Model):
     __tablename__ = 'user_alerts'
     
-    id = db.Column(UUID(as_uuid=True) if 'postgresql' in os.getenv('DATABASE_URL', '') else db.String(36), 
-                   primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = db.Column(UUID(as_uuid=True) if 'postgresql' in os.getenv('DATABASE_URL', '') else db.String(36), 
-                        db.ForeignKey('users.id'), nullable=False)
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
     alert_type = db.Column(db.String(50), nullable=False)  # 'high_probability', 'portfolio_risk', etc.
     ticker = db.Column(db.String(10))
     message = db.Column(db.Text, nullable=False)
@@ -30,5 +28,3 @@ class UserAlert(db.Model):
             'is_read': self.is_read,
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
-
-

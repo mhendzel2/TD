@@ -7,12 +7,10 @@ import os
 class TradingSession(db.Model):
     __tablename__ = 'trading_sessions'
     
-    id = db.Column(UUID(as_uuid=True) if 'postgresql' in os.getenv('DATABASE_URL', '') else db.String(36), 
-                   primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = db.Column(UUID(as_uuid=True) if 'postgresql' in os.getenv('DATABASE_URL', '') else db.String(36), 
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.String(36), 
                         db.ForeignKey('users.id'), nullable=False)
-    prediction_id = db.Column(UUID(as_uuid=True) if 'postgresql' in os.getenv('DATABASE_URL', '') else db.String(36), 
-                              db.ForeignKey('ml_predictions.id'))
+    prediction_id = db.Column(db.String(36), db.ForeignKey('ml_predictions.id'))
     ticker = db.Column(db.String(10), nullable=False)
     entry_price = db.Column(db.Numeric(10, 4))
     exit_price = db.Column(db.Numeric(10, 4))
@@ -41,5 +39,3 @@ class TradingSession(db.Model):
             'exit_timestamp': self.exit_timestamp.isoformat() if self.exit_timestamp else None,
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
-
-

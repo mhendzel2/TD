@@ -30,7 +30,7 @@ app = FastAPI(
 
 # Configuration from environment variables
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost,http://localhost:80").split(",")
-MODEL_PATH = os.getenv("MODEL_PATH", "/app/models")
+MODEL_PATH = os.getenv("MODEL_PATH", "models")
 
 # Add CORS middleware
 app.add_middleware(

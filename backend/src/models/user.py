@@ -15,20 +15,15 @@ from src.models.trading_session import TradingSession
 from src.models.newsletter_source import NewsletterSource
 from src.models.market_data import MarketData
 
-# Use JSON for SQLite compatibility, JSONB for PostgreSQL
-JsonType = JSONB if 'postgresql' in os.getenv('DATABASE_URL', '') else JSON
-ArrayType = ARRAY if 'postgresql' in os.getenv('DATABASE_URL', '') else Text
-
 class User(db.Model):
     __tablename__ = 'users'
     
-    id = db.Column(UUID(as_uuid=True) if 'postgresql' in os.getenv('DATABASE_URL', '') else db.String(36), 
-                   primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     email = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     first_name = db.Column(db.String(100))
     last_name = db.Column(db.String(100))
-    preferences = db.Column(JsonType, default={})
+    preferences = db.Column(JSON, default={})
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -56,5 +51,3 @@ class User(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
-
-

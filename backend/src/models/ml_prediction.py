@@ -2,30 +2,22 @@ from src.main import db
 from datetime import datetime
 import uuid
 from sqlalchemy.dialects.postgresql import UUID, JSONB
-from sqlalchemy import JSON
-import os
-
-# Helper to determine if using PostgreSQL for dialect-specific types
-IS_POSTGRES = os.getenv('DATABASE_URL', '').startswith('postgresql')
-
-# Use JSONB for PostgreSQL for better performance and functionality, otherwise use JSON
-JsonType = JSONB if IS_POSTGRES else JSON
+from sqlalchemy import JSON, Text
 
 class MLPrediction(db.Model):
     __tablename__ = "ml_predictions"
     
-    id = db.Column(UUID(as_uuid=True) if IS_POSTGRES else db.String(36), 
-                   primary_key=True, default=uuid.uuid4)
-    user_id = db.Column(UUID(as_uuid=True) if IS_POSTGRES else db.String(36), 
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.String(36), 
                         db.ForeignKey("users.id"), nullable=False)
-    newsletter_id = db.Column(UUID(as_uuid=True) if IS_POSTGRES else db.String(36), 
+    newsletter_id = db.Column(db.String(36), 
                               db.ForeignKey("newsletters.id"))
     ticker = db.Column(db.String(10), nullable=False)
     prediction_timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     probability_score = db.Column(db.Numeric(5, 4), nullable=False)
     confidence_lower = db.Column(db.Numeric(5, 4))
     confidence_upper = db.Column(db.Numeric(5, 4))
-    contributing_factors = db.Column(JsonType)
+    contributing_factors = db.Column(JSON)
     model_version = db.Column(db.String(50))
     
     __table_args__ = (

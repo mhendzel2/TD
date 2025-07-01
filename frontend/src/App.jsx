@@ -1,19 +1,15 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import Box from '@mui/material/Box';
-import CircularProgress from '@mui/material/CircularProgress';
-import Alert from '@mui/material/Alert';
-import Snackbar from '@mui/material/Snackbar';
+import { BrowserRouter as Router, Route, Routes, Navigate, Outlet } from 'react-router-dom';
 
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { ThemeContext, useTheme } from './contexts/ThemeContext';
+import { ThemeProvider as CustomThemeProvider } from './contexts/ThemeContext';
 import { WebSocketProvider } from './contexts/WebSocketContext';
 
 import Header from './components/layout/Header';
 import Sidebar from './components/layout/Sidebar';
 import LoadingSpinner from './components/ui/LoadingSpinner';
+// To handle notifications consistently with shadcn/ui, consider using react-hot-toast
+// import { Toaster } from 'react-hot-toast';
 
 // Lazy load pages for better performance
 const LoginPage = lazy(() => import('./pages/LoginPage'));
@@ -25,29 +21,40 @@ const AlertsPage = lazy(() => import('./pages/AlertsPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
+// Layout for authenticated routes, includes Header and Sidebar
+function MainLayout() {
+  return (
+    <div className="flex h-screen bg-gray-900 text-gray-100">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-6">
+          <Suspense fallback={<div className="flex justify-center items-center h-full"><LoadingSpinner size="lg" /></div>}>
+            <Outlet />
+          </Suspense>
+        </main>
+      </div>
+    </div>
+  );
+}
+
 function PrivateRoute({ children }) {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <div className="flex justify-center items-center h-screen"><LoadingSpinner size="lg" /></div>;
   }
 
   return isAuthenticated ? children : <Navigate to="/login" />;
 }
 
 function AppContent() {
-  const { theme } = useTheme();
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState('info');
 
   // Global error handler (can be improved with a dedicated error context)
   useEffect(() => {
     const handleError = (event) => {
       console.error('Unhandled error:', event.error);
-      setSnackbarMessage(event.message || 'An unexpected error occurred.');
-      setSnackbarSeverity('error');
-      setSnackbarOpen(true);
+      // Example: toast.error(event.message || 'An unexpected error occurred.');
     };
 
     window.addEventListener('error', handleError);
@@ -109,5 +116,3 @@ function App() {
 }
 
 export default App;
-
-

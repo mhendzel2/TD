@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import logging
+import asyncio
 import os
 import sys
 
@@ -14,6 +15,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 from src.models.sentiment_analyzer import NewsletterSentimentAnalyzer
 from src.models.trading_predictor import TradingPredictor
+from src.models.mat_transformer import MATPredictor
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -26,10 +28,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Configuration from environment variables
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost,http://localhost:80").split(",")
+MODEL_PATH = os.getenv("MODEL_PATH", "/app/models")
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -262,6 +268,99 @@ async def get_model_performance():
         logger.error(f"Error getting model performance: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# MAT Model specific endpoints
+@app.get("/models/mat/status")
+async def get_mat_model_status():
+    """Get the current status of the MAT model."""
+    try:
+        mat_info = {
+            "mat_enabled": trading_predictor.use_mat,
+            "mat_loaded": trading_predictor.mat_predictor is not None,
+            "mat_trained": False
+        }
+        
+        if trading_predictor.mat_predictor:
+            mat_info["mat_trained"] = trading_predictor.mat_predictor.is_trained
+            mat_info["device"] = str(trading_predictor.mat_predictor.device)
+        
+        return mat_info
+        
+    except Exception as e:
+        logger.error(f"Error getting MAT model status: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/models/mat/train")
+async def train_mat_model(background_tasks: BackgroundTasks):
+    """Train the MAT model specifically."""
+    try:
+        if not trading_predictor.use_mat:
+            raise HTTPException(status_code=400, detail="MAT model is not enabled")
+        
+        background_tasks.add_task(train_mat_background)
+        
+        return {
+            "message": "MAT model training started in background",
+            "status": "training",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error starting MAT model training: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/models/info")
+async def get_all_models_info():
+    """Get comprehensive information about all models."""
+    try:
+        return trading_predictor.get_model_info()
+        
+    except Exception as e:
+        logger.error(f"Error getting models info: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Background task for MAT model training
+async def train_mat_background():
+    """Background task to train MAT model specifically."""
+    try:
+        logger.info("Starting MAT model training...")
+        
+        # Create mock sequence data for MAT training
+        np.random.seed(42)
+        n_samples = 500
+        seq_length = 10
+        txt_features = 6
+        ts_features = 6
+        pred_horizon = 3
+        
+        # Generate mock time series data
+        txt_data = np.random.randn(n_samples, seq_length, txt_features)
+        ts_data = np.random.randn(n_samples, seq_length, ts_features)
+        target_data = np.random.randn(n_samples, pred_horizon, 1)
+        
+        # Initialize MAT predictor if not already done
+        if trading_predictor.mat_predictor is None:
+            trading_predictor.mat_predictor = MATPredictor(trading_predictor.config)
+        
+        # Train MAT model
+        result = trading_predictor.mat_predictor.train(
+            txt_data, ts_data, target_data, epochs=50
+        )
+        
+        if result['success']:
+            logger.info("MAT model training completed successfully")
+            
+            # Save MAT model
+            os.makedirs(MODEL_PATH, exist_ok=True)
+            mat_file = os.path.join(MODEL_PATH, "mat_model.pth")
+            trading_predictor.mat_predictor.save_model(mat_file)
+            logger.info(f"MAT model saved to {mat_file}")
+            
+        else:
+            logger.error(f"MAT model training failed: {result.get('error')}")
+            
+    except Exception as e:
+        logger.error(f"Error in MAT model training: {str(e)}")
+
 # Background task for model training
 async def train_models_background():
     """Background task to train models with mock data."""
@@ -308,8 +407,9 @@ async def train_models_background():
             logger.info("Background model training completed successfully")
             
             # Save models
-            model_path = "/tmp/trading_models"
-            trading_predictor.save_models(model_path)
+            os.makedirs(MODEL_PATH, exist_ok=True)
+            trading_predictor.save_models(MODEL_PATH)
+            logger.info(f"Models saved to {MODEL_PATH}")
             
         else:
             logger.error(f"Background model training failed: {result.get('error')}")
@@ -322,16 +422,15 @@ async def train_models_background():
 async def startup_event():
     """Load models on application startup."""
     try:
-        model_path = "/tmp/trading_models"
-        if os.path.exists(model_path):
-            success = trading_predictor.load_models(model_path)
+        if os.path.exists(MODEL_PATH) and any(os.scandir(MODEL_PATH)):
+            success = trading_predictor.load_models(MODEL_PATH)
             if success:
-                logger.info("Models loaded successfully on startup")
+                logger.info(f"Models loaded successfully from {MODEL_PATH} on startup")
             else:
                 logger.warning("Failed to load models on startup")
         else:
-            logger.info("No saved models found. Training with mock data...")
-            await train_models_background()
+            logger.info("No saved models found. Starting initial training in the background...")
+            asyncio.create_task(train_models_background())
             
     except Exception as e:
         logger.error(f"Error during startup: {str(e)}")
@@ -339,4 +438,3 @@ async def startup_event():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-

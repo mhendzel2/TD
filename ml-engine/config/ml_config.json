@@ -71,6 +71,20 @@
     "update_interval_hours": 168,
     "external_source": "config/sentiment_terms.json",
     "auto_update": false
+  },
+  "use_mat_model": true,
+  "mat_model": {
+    "d_model": 256,
+    "n_heads": 8,
+    "n_encoder_layers": 2,
+    "n_decoder_layers": 1,
+    "d_ff": 1024,
+    "dropout": 0.1,
+    "learning_rate": 0.001,
+    "max_seq_length": 50,
+    "sequence_length": 10,
+    "prediction_horizon": 3,
+    "txt_features": 6,
+    "ts_features": 6
   }
 }
-

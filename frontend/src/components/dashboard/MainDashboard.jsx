@@ -37,14 +37,6 @@ const MainDashboard = ({ user }) => {
     { date: '2024-06-01', portfolio: 115600, benchmark: 108200 }
   ]);
 
-  const [predictionData] = useState([
-    { ticker: 'AAPL', probability: 0.87, confidence: 0.92 },
-    { ticker: 'TSLA', probability: 0.74, confidence: 0.85 },
-    { ticker: 'NVDA', probability: 0.91, confidence: 0.88 },
-    { ticker: 'MSFT', probability: 0.68, confidence: 0.79 },
-    { ticker: 'GOOGL', probability: 0.82, confidence: 0.86 }
-  ]);
-
   useEffect(() => {
     fetchDashboardData();
 
@@ -297,7 +289,7 @@ const MainDashboard = ({ user }) => {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={predictionData}>
+              <BarChart data={dashboardData?.topPredictions || []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis 
                   dataKey="ticker" 
@@ -319,7 +311,7 @@ const MainDashboard = ({ user }) => {
                   formatter={(value) => [`${(value * 100).toFixed(1)}%`, 'Probability']}
                 />
                 <Bar 
-                  dataKey="probability" 
+                  dataKey="probability_score" 
                   fill="#10B981"
                   radius={[4, 4, 0, 0]}
                 />
@@ -434,4 +426,3 @@ const MainDashboard = ({ user }) => {
 };
 
 export default MainDashboard;
-

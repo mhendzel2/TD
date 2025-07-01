@@ -425,5 +425,65 @@ class NewsletterProcessor:
         
         # Adjust based on source credibility (would be configurable)
         source_multipliers = {
-            "pr
-
+            "premium_source": 1.2,
+            "trusted_source": 1.1,
+            "standard_source": 1.0,
+            "unknown_source": 0.9
+        }
+        
+        # Apply source multiplier (default to standard if not found)
+        multiplier = source_multipliers.get(source.lower().replace(" ", "_"), 1.0)
+        base_score = int(base_score * multiplier)
+        
+        # Ensure score is within bounds
+        return max(1, min(10, base_score))
+    
+    def extract_key_phrases(self, content: str, tickers: List[str]) -> List[str]:
+        """
+        Extract key trading phrases and signals from content.
+        """
+        try:
+            # Trading signal patterns
+            signal_patterns = [
+                r"buy\s+(?:signal|alert|recommendation)",
+                r"sell\s+(?:signal|alert|recommendation)",
+                r"strong\s+(?:buy|sell)",
+                r"price\s+target",
+                r"stop\s+loss",
+                r"resistance\s+level",
+                r"support\s+level",
+                r"breakout",
+                r"earnings\s+(?:beat|miss)",
+                r"analyst\s+(?:upgrade|downgrade)",
+                r"insider\s+(?:buying|selling)",
+                r"short\s+interest",
+                r"volume\s+spike"
+            ]
+            
+            key_phrases = []
+            
+            for pattern in signal_patterns:
+                matches = re.finditer(pattern, content, re.IGNORECASE)
+                for match in matches:
+                    # Extract surrounding context
+                    start = max(0, match.start() - 50)
+                    end = min(len(content), match.end() + 50)
+                    context = content[start:end].strip()
+                    key_phrases.append(context)
+            
+            # Remove duplicates and limit to top 10
+            unique_phrases = list(dict.fromkeys(key_phrases))[:10]
+            
+            return unique_phrases
+            
+        except Exception as e:
+            logger.error(f"Error extracting key phrases: {str(e)}")
+            return []
+    
+    def validate_ticker_with_api(self, ticker: str) -> bool:
+        """
+        Validate ticker using external API (placeholder for future implementation).
+        """
+        # This would integrate with a financial data API like Alpha Vantage, IEX, etc.
+        # For now, return True for known tickers, False for obvious false positives
+        return ticker in self.known_tickers or (len(ticker) >= 2 and ticker not in self.false_positives)

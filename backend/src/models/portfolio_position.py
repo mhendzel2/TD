@@ -2,14 +2,13 @@ from src.main import db
 from datetime import datetime
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
-import os
 
 class PortfolioPosition(db.Model):
     __tablename__ = 'portfolio_positions'
     
-    id = db.Column(UUID(as_uuid=True) if 'postgresql' in os.getenv('DATABASE_URL', '') else db.String(36), 
-                   primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = db.Column(UUID(as_uuid=True) if 'postgresql' in os.getenv('DATABASE_URL', '') else db.String(36), 
+    id = db.Column(UUID(as_uuid=True), 
+                   primary_key=True, default=uuid.uuid4)
+    user_id = db.Column(UUID(as_uuid=True), 
                         db.ForeignKey('users.id'), nullable=False)
     ticker = db.Column(db.String(10), nullable=False)
     position_type = db.Column(db.String(20))  # 'STOCK', 'CALL', 'PUT'
@@ -22,7 +21,14 @@ class PortfolioPosition(db.Model):
     gamma = db.Column(db.Numeric(8, 4))
     theta = db.Column(db.Numeric(8, 4))
     vega = db.Column(db.Numeric(8, 4))
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        # Index for efficiently querying all positions for a user.
+        db.Index('ix_portfolio_positions_user_id_ticker', 'user_id', 'ticker'),
+        # Ensure a user can only have one position entry per ticker.
+        db.UniqueConstraint('user_id', 'ticker', name='uq_user_ticker_position'),
+    )
 
     def __repr__(self):
         return f'<PortfolioPosition {self.ticker}: {self.quantity}>'
@@ -42,7 +48,5 @@ class PortfolioPosition(db.Model):
             'gamma': float(self.gamma) if self.gamma else None,
             'theta': float(self.theta) if self.theta else None,
             'vega': float(self.vega) if self.vega else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+            'updated_at': self.updated_at.isoformat()
         }
-
-

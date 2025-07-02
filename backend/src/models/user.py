@@ -1,7 +1,6 @@
 from src.main import db
 from datetime import datetime
 import uuid
-from sqlalchemy.dialects.postgresql import UUID, ARRAY, JSONB
 from sqlalchemy import JSON, Text
 from werkzeug.security import generate_password_hash, check_password_hash
 import os

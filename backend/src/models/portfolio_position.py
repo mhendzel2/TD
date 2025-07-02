@@ -1,7 +1,6 @@
 from src.main import db
 from datetime import datetime
 import uuid
-from sqlalchemy.dialects.postgresql import UUID
 
 class PortfolioPosition(db.Model):
     __tablename__ = 'portfolio_positions'

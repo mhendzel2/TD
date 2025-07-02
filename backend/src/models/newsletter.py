@@ -1,7 +1,6 @@
 from src.main import db
 from datetime import datetime
 import uuid
-from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from sqlalchemy import Text
 
 class Newsletter(db.Model):
@@ -49,10 +48,10 @@ class Newsletter(db.Model):
             "processed_content": self.processed_content,
             "sentiment_score": self.sentiment_score,
             "sentiment_confidence": self.sentiment_confidence,
-            "bullish_terms": self.bullish_terms.split(',') if self.bullish_terms else [],
-            "bearish_terms": self.bearish_terms.split(',') if self.bearish_terms else [],
-            "tickers": self.tickers.split(',') if self.tickers else [],
-            "key_phrases": self.key_phrases.split(',') if self.key_phrases else [],
+            "bullish_terms": [term.strip() for term in self.bullish_terms.split(',')] if self.bullish_terms else [],
+            "bearish_terms": [term.strip() for term in self.bearish_terms.split(',')] if self.bearish_terms else [],
+            "tickers": [term.strip() for term in self.tickers.split(',')] if self.tickers else [],
+            "key_phrases": [term.strip() for term in self.key_phrases.split(',')] if self.key_phrases else [],
             "priority_score": self.priority_score,
             "analysis_status": self.analysis_status,
             "created_at": self.created_at.isoformat(),
